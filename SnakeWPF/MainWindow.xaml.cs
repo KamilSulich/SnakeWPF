@@ -118,7 +118,7 @@ namespace SnakeWPF
                 GameWorld.Children.Add(line);
             }
 
-            for (int i = 0; i < _numberOfColumns; i++)
+            for (int i = 0; i < _numberOfColumns+1; i++)
             {
                 Line line = new Line();
                 line.Stroke = Brushes.Black;
@@ -140,8 +140,8 @@ namespace SnakeWPF
 
         private void MakeGameFaster()
         {
-            if (_gameLoopTimer.Interval.TotalSeconds>0.1)
-            _gameLoopTimer.Interval = _gameLoopTimer.Interval - TimeSpan.FromSeconds(0.1);
+            if (_gameLoopTimer.Interval.TotalSeconds>0.05)
+            _gameLoopTimer.Interval = _gameLoopTimer.Interval - TimeSpan.FromSeconds(0.05);
         }
 
         private void  MainGameLoop(object sender, EventArgs e)
@@ -171,8 +171,8 @@ namespace SnakeWPF
         {
             if (_apple != null)
                 return;
-            
-                _apple = new Apple(_elementSize)
+
+            _apple = new Apple(_elementSize)
                 {
                     X= _RandomNumber.Next(0, _numberOfColumns) *_elementSize,
                  Y= _RandomNumber.Next(0, _numberOfRows) * _elementSize
