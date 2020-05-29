@@ -1,16 +1,10 @@
-﻿using System;
+﻿using SnakeWPF.GameEntities;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
@@ -26,15 +20,20 @@ namespace SnakeWPF
         private int _numberOfRows;
 
         DispatcherTimer _gameLoopTimer;
-        List<GameEntities.SnakeElement> _snakeElements;
+        List<SnakeElement> _snakeElements;
+        List<Apple> _apples;
+        private Random _RandomNumber;
 
         private Direction _currentDirection;
         private double _gameWith;
         private double _gameHeight;
+        private long _elapsedTicks;
 
         public MainWindow()
         {
             InitializeComponent();
+            _RandomNumber = new Random(DateTime.Now.Millisecond / DateTime.Now.Second);
+            _apples = new List<Apple>();
             InitializeTimer();
             DrawGameWorld();
             InitializeSnake();
@@ -57,8 +56,8 @@ namespace SnakeWPF
 
         private void InitializeSnake()
         {
-            _snakeElements = new List<GameEntities.SnakeElement>();
-            _snakeElements.Add(new GameEntities.SnakeElement(_elementSize)
+            _snakeElements = new List<SnakeElement>();
+            _snakeElements.Add(new SnakeElement(_elementSize)
             {
                 X = (_numberOfRows / 2) * _elementSize,
                 Y = (_numberOfColumns / 2) * _elementSize,
@@ -110,6 +109,33 @@ namespace SnakeWPF
             MoveSnake();
             CheckColision();
             DrawSnake();
+            CreateApple();
+            DrawApples();
+        }
+
+        private void DrawApples()
+        {
+            foreach (var apple in _apples)
+            {
+                if (!GameWorld.Children.Contains(apple.UIElement))
+                    GameWorld.Children.Add(apple.UIElement);
+
+                Canvas.SetLeft(apple.UIElement, apple.X);
+                Canvas.SetTop(apple.UIElement, apple.Y);
+
+            }
+        }
+
+        private void CreateApple()
+        {
+            if ( _elapsedTicks / 20 == 0)
+            {
+                _apples.Add(new Apple(_elementSize)
+                {X= _RandomNumber.Next(0, _numberOfColumns) *_elementSize,
+                 Y= _RandomNumber.Next(0, _numberOfRows) * _elementSize
+                });;
+            }
+
         }
 
         private void CheckColision()
@@ -121,7 +147,7 @@ namespace SnakeWPF
 
         private void CheckColisionWitchWorldItems()
         {
-            GameEntities.SnakeElement snakeHead = GetSnakeHead();
+            SnakeElement snakeHead = GetSnakeHead();
             if (snakeHead.X > _gameWith - _elementSize ||
                 snakeHead.X < 0 ||
                 snakeHead.Y < 0 ||
@@ -134,7 +160,7 @@ namespace SnakeWPF
 
         private void CheckColisionWitchSelf()
         {
-            GameEntities.SnakeElement snakeHead = GetSnakeHead();
+            SnakeElement snakeHead = GetSnakeHead();
             if (snakeHead !=null)
             {
                 foreach (var snakeElement in _snakeElements)
@@ -150,9 +176,9 @@ namespace SnakeWPF
                 }
             }
         }
-        private GameEntities.SnakeElement GetSnakeHead() 
+        private SnakeElement GetSnakeHead() 
         {
-            GameEntities.SnakeElement snakeHead = null;
+            SnakeElement snakeHead = null;
             foreach (var snakeElement in _snakeElements)
             {
                 if (snakeElement.IsHead)
