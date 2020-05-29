@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace SnakeWPF
+namespace SnakeWPF.GameEntities
 {
     class SnakeElement
     {

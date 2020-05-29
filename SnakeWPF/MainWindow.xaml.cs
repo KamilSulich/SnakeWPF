@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+
 namespace SnakeWPF
 {
     /// <summary>
@@ -25,7 +26,7 @@ namespace SnakeWPF
         private int _numberOfRows;
 
         DispatcherTimer _gameLoopTimer;
-        List<SnakeElement> _snakeElements;
+        List<GameEntities.SnakeElement> _snakeElements;
 
         private Direction _currentDirection;
         private double _gameWith;
@@ -38,6 +39,7 @@ namespace SnakeWPF
             DrawGameWorld();
             InitializeSnake();
             DrawSnake();
+            //MessageBox.Show("Sterowanie klawiszami A,W,S,D");
         }
 
         private void DrawSnake()
@@ -55,8 +57,8 @@ namespace SnakeWPF
 
         private void InitializeSnake()
         {
-            _snakeElements = new List<SnakeElement>();
-            _snakeElements.Add(new SnakeElement(_elementSize)
+            _snakeElements = new List<GameEntities.SnakeElement>();
+            _snakeElements.Add(new GameEntities.SnakeElement(_elementSize)
             {
                 X = (_numberOfRows / 2) * _elementSize,
                 Y = (_numberOfColumns / 2) * _elementSize,
@@ -119,15 +121,48 @@ namespace SnakeWPF
 
         private void CheckColisionWitchWorldItems()
         {
-            foreach (var snakeElement in _snakeElements)
-                if (snakeElement.X > _gameWith || snakeElement.X < 0 || snakeElement.Y < 0 || snakeElement.Y > _gameHeight)
-                    MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry");
+            GameEntities.SnakeElement snakeHead = GetSnakeHead();
+            if (snakeHead.X > _gameWith - _elementSize ||
+                snakeHead.X < 0 ||
+                snakeHead.Y < 0 ||
+                snakeHead.Y > _gameHeight - _elementSize)
+            {
+                MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry");
+            }
+           
         }
 
         private void CheckColisionWitchSelf()
         {
+            GameEntities.SnakeElement snakeHead = GetSnakeHead();
+            if (snakeHead !=null)
+            {
+                foreach (var snakeElement in _snakeElements)
+                {
+                    if (!snakeElement.IsHead)
+                    {
+                        if(snakeElement.X == snakeHead.X && snakeElement.Y==snakeHead.Y)
+                        {
+                            MessageBox.Show("Wąż uderzył głową w samego siebie, koniec gry");
+                        }
+                        break;
+                    }
+                }
+            }
         }
-
+        private GameEntities.SnakeElement GetSnakeHead() 
+        {
+            GameEntities.SnakeElement snakeHead = null;
+            foreach (var snakeElement in _snakeElements)
+            {
+                if (snakeElement.IsHead)
+                {
+                    snakeHead = snakeElement;
+                    break;
+                }
+            }
+            return snakeHead;
+        }
         private void CheckColisionWitchWorldBounds()
         {
         }
