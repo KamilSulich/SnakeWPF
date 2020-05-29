@@ -13,5 +13,18 @@ namespace SnakeWPF.GameEntities
             rect.Fill = Brushes.Red;
             UIElement = rect;
         }
+
+        public override bool Equals(object obj)
+        {
+            Apple apple = obj as Apple;
+            if (apple != null)
+            {
+                return X == apple.X && Y == apple.Y;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

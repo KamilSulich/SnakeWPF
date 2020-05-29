@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-
+using System.Linq;
 namespace SnakeWPF
 {
     /// <summary>
@@ -28,6 +28,7 @@ namespace SnakeWPF
         private double _gameWith;
         private double _gameHeight;
         private long _elapsedTicks;
+        private SnakeElement _tailBackup;
 
         public MainWindow()
         {
@@ -59,11 +60,14 @@ namespace SnakeWPF
             _snakeElements = new List<SnakeElement>();
             _snakeElements.Add(new SnakeElement(_elementSize)
             {
-                X = (_numberOfRows / 2) * _elementSize,
-                Y = (_numberOfColumns / 2) * _elementSize,
+                X = (_numberOfColumns  / 2) * _elementSize,
+                Y = (_numberOfRows / 2) * _elementSize,
                 IsHead = true
             });
-            _currentDirection = Direction.Left;
+
+    
+
+            _currentDirection = Direction.Right;
         }
 
         private void DrawGameWorld()
@@ -111,6 +115,7 @@ namespace SnakeWPF
             DrawSnake();
             CreateApple();
             DrawApples();
+            _elapsedTicks++;
         }
 
         private void DrawApples()
@@ -147,15 +152,28 @@ namespace SnakeWPF
 
         private void CheckColisionWitchWorldItems()
         {
-            SnakeElement snakeHead = GetSnakeHead();
-            if (snakeHead.X > _gameWith - _elementSize ||
-                snakeHead.X < 0 ||
-                snakeHead.Y < 0 ||
-                snakeHead.Y > _gameHeight - _elementSize)
+
+            SnakeElement head = _snakeElements[0];
+            Apple collidedWitchSnake = null;
+            foreach (var apple in _apples)
             {
-                MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry");
+                if(head.X==apple.X && head.Y==apple.Y)
+                {
+                    collidedWitchSnake = apple;
+                    break;
+                }
             }
-           
+            if (collidedWitchSnake != null)
+            {
+                _apples.Remove(collidedWitchSnake);
+                GameWorld.Children.Remove(collidedWitchSnake.UIElement);
+                GrowSnake();
+            }
+        }
+
+        private void GrowSnake()
+        {
+            _snakeElements.Add(new SnakeElement(_elementSize) {X=_tailBackup.X, Y= _tailBackup.Y });
         }
 
         private void CheckColisionWitchSelf()
@@ -191,30 +209,52 @@ namespace SnakeWPF
         }
         private void CheckColisionWitchWorldBounds()
         {
+            SnakeElement snakeHead = GetSnakeHead();
+            if (snakeHead.X > _gameWith - _elementSize ||
+                snakeHead.X < 0 ||
+                snakeHead.Y < 0 ||
+                snakeHead.Y > _gameHeight - _elementSize)
+            {
+                MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry");
+            }
         }
 
         private void MoveSnake()
         {
-            foreach (var snakeElement in _snakeElements)
+            SnakeElement head = _snakeElements[0];
+            SnakeElement tail = _snakeElements[_snakeElements.Count - 1];
+            _tailBackup = new SnakeElement(_elementSize)
             {
-                switch (_currentDirection)
-                {
-                    case Direction.Right:
-                        snakeElement.X += _elementSize;
-                        break;
-                    case Direction.Left:
-                        snakeElement.X -= _elementSize;
-                        break;
-                    case Direction.Up:
-                        snakeElement.Y -= _elementSize;
-                        break;
-                    case Direction.Down:
-                        snakeElement.Y += _elementSize;
-                        break;
-                    default:
-                        break;
-                }
+                X = tail.X,
+                Y = tail.Y
+            };
+            head.IsHead = false;
+            tail.IsHead = true;
+            tail.X = head.X;
+            tail.Y = head.Y;
+
+            switch (_currentDirection)
+            {
+                case Direction.Right:
+                    tail.X += _elementSize;
+                    break;
+                case Direction.Left:
+                    tail.X -= _elementSize;
+                    break;
+                case Direction.Up:
+                    tail.Y -= _elementSize;
+                    break;
+                case Direction.Down:
+                    tail.Y += _elementSize;
+                    break;
+                default:
+                    break;
             }
+
+            _snakeElements.RemoveAt(_snakeElements.Count - 1);
+            _snakeElements.Insert(0, tail);
+
+        
         }
         private void KeyWasRelased(object sender, KeyEventArgs e)
         {
