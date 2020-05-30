@@ -20,6 +20,9 @@ namespace SnakeWPF
         double gameHeight;
         int numberOfColumns;
         int numberOfRows;
+        int points = 0;
+        int pictureNumer = 0;
+        int oldPictureNumer = 0;
 
         Apple apple;
         Random RandomNumber;
@@ -32,13 +35,12 @@ namespace SnakeWPF
 
         public MainWindow()
         {
-            InitializeComponent();
-           
+            InitializeComponent();     
         }
 
         protected override void OnContentRendered(EventArgs e)
         {
-            MessageBox.Show("Sterowanie klawiszami A,W,S,D. Wciśnij przycisk OK, aby kontynuować.");
+            MessageBox.Show("Sterowanie klawiszami A,W,S,D lub strzałkami. Wciśnij przycisk OK, aby kontynuować.");
             listUrl = new List<string>();
             listUrl.Add("https://cdn.pixabay.com/photo/2015/02/28/15/25/snake-653639_960_720.jpg");
             listUrl.Add("https://cdn.pixabay.com/photo/2011/05/14/20/48/basilisk-rattlesnake-7303_960_720.jpg");
@@ -48,7 +50,6 @@ namespace SnakeWPF
 
             InitializeGame();
             base.OnContentRendered(e);
-
         }
 
         void InitializeGame()
@@ -79,6 +80,7 @@ namespace SnakeWPF
                 snakeElements = null;
             }
             tailBackup = null;
+            points = 0;
         }
 
         private void DrawSnake()
@@ -90,7 +92,6 @@ namespace SnakeWPF
 
                 Canvas.SetLeft(snakeElement.UIElement, snakeElement.X);
                 Canvas.SetTop(snakeElement.UIElement, snakeElement.Y);
-
             }
         }
 
@@ -103,9 +104,6 @@ namespace SnakeWPF
                 Y = (numberOfRows / 2) * elementSize,
                 IsHead = true
             });
-
-    
-
             currentDirection = Direction.Right;
         }
 
@@ -171,9 +169,7 @@ namespace SnakeWPF
                     GameWorld.Children.Add(apple.UIElement);
 
                 Canvas.SetLeft(apple.UIElement, apple.X);
-                Canvas.SetTop(apple.UIElement, apple.Y);
-
-            
+                Canvas.SetTop(apple.UIElement, apple.Y);          
         }
 
         private void CreateApple()
@@ -182,12 +178,10 @@ namespace SnakeWPF
                 return;
 
             apple = new Apple(elementSize)
-                {
+            {
                     X= RandomNumber.Next(0, numberOfColumns) *elementSize,
                  Y= RandomNumber.Next(0, numberOfRows) * elementSize
-                };
-            
-
+            };           
         }
 
         private void CheckColision()
@@ -206,13 +200,19 @@ namespace SnakeWPF
             if(head.X== apple.X && head.Y== apple.Y)
             {
                 WebClient wc = new WebClient();
-               int pictureNumer = RandomNumber.Next(0, 4);
+                pictureNumer = RandomNumber.Next(0, 4);
+                while (pictureNumer == oldPictureNumer)
+                {
+                    pictureNumer = RandomNumber.Next(0, 4);
+                }
+                oldPictureNumer = pictureNumer;
                 Uri imageUrl = new Uri(listUrl[pictureNumer]);
                 wc.DownloadFileAsync(imageUrl, "Snake.png");
                 GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
                 apple = null;
                 MakeGameFaster();
+                points++;
             }                  
         }
 
@@ -241,12 +241,17 @@ namespace SnakeWPF
             }
 
             if (hasCollision)
-            {
-                MessageBox.Show("Wąż uderzył głową w samego siebie, koniec gry");
+            {              
+                if (points > 1 && points< 5)
+                    MessageBox.Show("Wąż uderzył głową w samego siebie, koniec gry. Zdobyto " + points + " punkty. Kliknij OK, by zagrać ponownie.");
+                else 
+                    MessageBox.Show("Wąż uderzył głową w samego siebie, koniec gry. Zdobyto "+ points+ " punktów. Kliknij OK, by zagrać ponownie.");
+
                 ResetGame();
                 InitializeGame();
             }
         }
+
         private SnakeElement GetSnakeHead() 
         {
             SnakeElement snakeHead = null;
@@ -260,6 +265,7 @@ namespace SnakeWPF
             }
             return snakeHead;
         }
+
         private void CheckColisionWitchWorldBounds()
         {
             SnakeElement snakeHead = GetSnakeHead();
@@ -268,7 +274,15 @@ namespace SnakeWPF
                 snakeHead.Y < 0 ||
                 snakeHead.Y > gameHeight - elementSize)
             {
-                MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Chcesz zagrać jeszcze raz?");
+                if (points == 0)
+                    MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Tym razem nie zdobyto żadnych punktów. Kliknij OK, by zagrać ponownie.");
+                else if (points == 1)
+                    MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Zdobyto " + points + " punkt. Kliknij OK, by zagrać ponownie.");
+                else if (points > 1 && points < 5)
+                    MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Zdobyto " + points + " punkty. Kliknij OK, by zagrać ponownie.");
+                else
+                    MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Zdobyto " + points + " punktów. Kliknij OK, by zagrać ponownie.");
+
                 ResetGame();
                 InitializeGame();
             }
@@ -307,10 +321,9 @@ namespace SnakeWPF
             }
 
             snakeElements.RemoveAt(snakeElements.Count - 1);
-            snakeElements.Insert(0, tail);
-
-        
+            snakeElements.Insert(0, tail);    
         }
+
         private void KeyWasRelased(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -328,6 +341,22 @@ namespace SnakeWPF
                         currentDirection = Direction.Down;
                     break;
                 case Key.D:
+                    if (currentDirection != Direction.Left)
+                        currentDirection = Direction.Right;
+                    break;
+                case Key.Up:
+                    if (currentDirection != Direction.Down)
+                        currentDirection = Direction.Up;
+                    break;
+                case Key.Left:
+                    if (currentDirection != Direction.Right)
+                        currentDirection = Direction.Left;
+                    break;
+                case Key.Down:
+                    if (currentDirection != Direction.Up)
+                        currentDirection = Direction.Down;
+                    break;
+                case Key.Right:
                     if (currentDirection != Direction.Left)
                         currentDirection = Direction.Right;
                     break;
