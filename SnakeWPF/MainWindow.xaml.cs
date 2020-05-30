@@ -1,6 +1,7 @@
 ﻿using SnakeWPF.GameEntities;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,7 +27,8 @@ namespace SnakeWPF
         Direction currentDirection;
         DispatcherTimer gameLoopTimer;
         List<SnakeElement> snakeElements;
-        
+
+        List<string> listUrl;
 
         public MainWindow()
         {
@@ -37,6 +39,13 @@ namespace SnakeWPF
         protected override void OnContentRendered(EventArgs e)
         {
             MessageBox.Show("Sterowanie klawiszami A,W,S,D. Wciśnij przycisk OK, aby kontynuować.");
+            listUrl = new List<string>();
+            listUrl.Add("https://cdn.pixabay.com/photo/2015/02/28/15/25/snake-653639_960_720.jpg");
+            listUrl.Add("https://cdn.pixabay.com/photo/2011/05/14/20/48/basilisk-rattlesnake-7303_960_720.jpg");
+            listUrl.Add("https://cdn.pixabay.com/photo/2014/11/23/21/22/green-tree-python-543243_960_720.jpg");
+            listUrl.Add("https://cdn.pixabay.com/photo/2019/02/06/17/09/snake-3979601_960_720.jpg");
+            listUrl.Add("https://cdn.pixabay.com/photo/2014/11/21/15/33/snake-540656_960_720.jpg");
+
             InitializeGame();
             base.OnContentRendered(e);
 
@@ -196,6 +205,10 @@ namespace SnakeWPF
             
             if(head.X== apple.X && head.Y== apple.Y)
             {
+                WebClient wc = new WebClient();
+               int pictureNumer = RandomNumber.Next(0, 4);
+                Uri imageUrl = new Uri(listUrl[pictureNumer]);
+                wc.DownloadFileAsync(imageUrl, "Snake.png");
                 GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
                 apple = null;
