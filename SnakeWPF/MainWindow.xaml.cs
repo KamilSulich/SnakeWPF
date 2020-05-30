@@ -14,18 +14,18 @@ namespace SnakeWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        int _elementSize = 20;
-        double _gameWith;
-        double _gameHeight;
-        int _numberOfColumns;
-        int _numberOfRows;
+        int elementSize = 20;
+        double gameWith;
+        double gameHeight;
+        int numberOfColumns;
+        int numberOfRows;
 
-        Apple _apple;
-        Random _RandomNumber;
-        SnakeElement _tailBackup;
-        Direction _currentDirection;
-        DispatcherTimer _gameLoopTimer;
-        List<SnakeElement> _snakeElements;
+        Apple apple;
+        Random RandomNumber;
+        SnakeElement tailBackup;
+        Direction currentDirection;
+        DispatcherTimer gameLoopTimer;
+        List<SnakeElement> snakeElements;
         
 
         public MainWindow()
@@ -36,6 +36,7 @@ namespace SnakeWPF
 
         protected override void OnContentRendered(EventArgs e)
         {
+            MessageBox.Show("Sterowanie klawiszami A,W,S,D. Wciśnij przycisk OK, aby kontynuować.");
             InitializeGame();
             base.OnContentRendered(e);
 
@@ -43,38 +44,37 @@ namespace SnakeWPF
 
         void InitializeGame()
         {
-            _RandomNumber = new Random(DateTime.Now.Millisecond);
+            RandomNumber = new Random(DateTime.Now.Millisecond);
             InitializeTimer();
             DrawGameWorld();
             InitializeSnake();
-            DrawSnake();
-            //MessageBox.Show("Sterowanie klawiszami A,W,S,D");
+            DrawSnake();           
         }
 
         void ResetGame()
         {
-            if (_gameLoopTimer != null)
+            if (gameLoopTimer != null)
             {
-                _gameLoopTimer.Stop();
-                _gameLoopTimer.Tick -= MainGameLoop;
-                _gameLoopTimer = null;
+                gameLoopTimer.Stop();
+                gameLoopTimer.Tick -= MainGameLoop;
+                gameLoopTimer = null;
             }
             if (GameWorld !=null)
             {
                 GameWorld.Children.Clear();
             }
-            _apple = null;
-            if (_snakeElements != null)
+            apple = null;
+            if (snakeElements != null)
             {
-                _snakeElements.Clear();
-                _snakeElements = null;
+                snakeElements.Clear();
+                snakeElements = null;
             }
-            _tailBackup = null;
+            tailBackup = null;
         }
 
         private void DrawSnake()
         {
-            foreach (var snakeElement in _snakeElements)
+            foreach (var snakeElement in snakeElements)
             {
                 if (!GameWorld.Children.Contains(snakeElement.UIElement))
                     GameWorld.Children.Add(snakeElement.UIElement);
@@ -87,61 +87,61 @@ namespace SnakeWPF
 
         private void InitializeSnake()
         {
-            _snakeElements = new List<SnakeElement>();
-            _snakeElements.Add(new SnakeElement(_elementSize)
+            snakeElements = new List<SnakeElement>();
+            snakeElements.Add(new SnakeElement(elementSize)
             {
-                X = (_numberOfColumns  / 2) * _elementSize,
-                Y = (_numberOfRows / 2) * _elementSize,
+                X = (numberOfColumns  / 2) * elementSize,
+                Y = (numberOfRows / 2) * elementSize,
                 IsHead = true
             });
 
     
 
-            _currentDirection = Direction.Right;
+            currentDirection = Direction.Right;
         }
 
         private void DrawGameWorld()
         {
-             _gameWith = GameWorld.ActualWidth;
-             _gameHeight = GameWorld.ActualHeight;
-             _numberOfColumns = (int)_gameWith / _elementSize;
-             _numberOfRows = (int)_gameHeight / _elementSize;
+             gameWith = GameWorld.ActualWidth;
+             gameHeight = GameWorld.ActualHeight;
+             numberOfColumns = (int)gameWith / elementSize;
+             numberOfRows = (int)gameHeight / elementSize;
 
-            for (int i=0; i< _numberOfRows; i++ )
+            for (int i=0; i< numberOfRows; i++ )
             {
                 Line line = new Line();
                 line.Stroke = Brushes.Black;
                 line.X1 = 0;
-                line.Y1 = i * _elementSize;
-                line.X2 = _gameWith;
-                line.Y2 = i * _elementSize;
+                line.Y1 = i * elementSize;
+                line.X2 = gameWith;
+                line.Y2 = i * elementSize;
                 GameWorld.Children.Add(line);
             }
 
-            for (int i = 0; i < _numberOfColumns+1; i++)
+            for (int i = 0; i < numberOfColumns+1; i++)
             {
                 Line line = new Line();
                 line.Stroke = Brushes.Black;
-                line.X1 = i * _elementSize;
+                line.X1 = i * elementSize;
                 line.Y1 = 0;
-                line.X2 = i * _elementSize;
-                line.Y2 = _gameHeight;
+                line.X2 = i * elementSize;
+                line.Y2 = gameHeight;
                 GameWorld.Children.Add(line);
             }
         }
 
         private void InitializeTimer()
         {
-            _gameLoopTimer = new DispatcherTimer();
-            _gameLoopTimer.Interval = TimeSpan.FromSeconds(0.2);
-            _gameLoopTimer.Tick += new EventHandler(MainGameLoop); 
-            _gameLoopTimer.Start();
+            gameLoopTimer = new DispatcherTimer();
+            gameLoopTimer.Interval = TimeSpan.FromSeconds(0.2);
+            gameLoopTimer.Tick += new EventHandler(MainGameLoop); 
+            gameLoopTimer.Start();
         }
 
         private void MakeGameFaster()
         {
-            if (_gameLoopTimer.Interval.TotalSeconds>0.05)
-            _gameLoopTimer.Interval = _gameLoopTimer.Interval - TimeSpan.FromSeconds(0.05);
+            if (gameLoopTimer.Interval.TotalSeconds>0.05)
+            gameLoopTimer.Interval = gameLoopTimer.Interval - TimeSpan.FromSeconds(0.05);
         }
 
         private void  MainGameLoop(object sender, EventArgs e)
@@ -155,27 +155,27 @@ namespace SnakeWPF
 
         private void DrawApples()
         {
-            if (_apple == null)
+            if (apple == null)
                 return;
            
-                if (!GameWorld.Children.Contains(_apple.UIElement))
-                    GameWorld.Children.Add(_apple.UIElement);
+                if (!GameWorld.Children.Contains(apple.UIElement))
+                    GameWorld.Children.Add(apple.UIElement);
 
-                Canvas.SetLeft(_apple.UIElement, _apple.X);
-                Canvas.SetTop(_apple.UIElement, _apple.Y);
+                Canvas.SetLeft(apple.UIElement, apple.X);
+                Canvas.SetTop(apple.UIElement, apple.Y);
 
             
         }
 
         private void CreateApple()
         {
-            if (_apple != null)
+            if (apple != null)
                 return;
 
-            _apple = new Apple(_elementSize)
+            apple = new Apple(elementSize)
                 {
-                    X= _RandomNumber.Next(0, _numberOfColumns) *_elementSize,
-                 Y= _RandomNumber.Next(0, _numberOfRows) * _elementSize
+                    X= RandomNumber.Next(0, numberOfColumns) *elementSize,
+                 Y= RandomNumber.Next(0, numberOfRows) * elementSize
                 };
             
 
@@ -190,22 +190,22 @@ namespace SnakeWPF
 
         private void CheckColisionWitchWorldItems()
         {
-            if (_apple == null)
+            if (apple == null)
                 return;
-            SnakeElement head = _snakeElements[0];
+            SnakeElement head = snakeElements[0];
             
-            if(head.X== _apple.X && head.Y== _apple.Y)
+            if(head.X== apple.X && head.Y== apple.Y)
             {
-                GameWorld.Children.Remove(_apple.UIElement);
+                GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
-                _apple = null;
+                apple = null;
                 MakeGameFaster();
             }                  
         }
 
         private void GrowSnake()
         {
-            _snakeElements.Add(new SnakeElement(_elementSize) {X=_tailBackup.X, Y= _tailBackup.Y });
+            snakeElements.Add(new SnakeElement(elementSize) {X=tailBackup.X, Y= tailBackup.Y });
         }
 
         private void CheckColisionWitchSelf()
@@ -214,7 +214,7 @@ namespace SnakeWPF
             bool hasCollision = false;
             if (snakeHead !=null)
             {
-                foreach (var snakeElement in _snakeElements)
+                foreach (var snakeElement in snakeElements)
                 {
                     if (!snakeElement.IsHead)
                     {
@@ -237,7 +237,7 @@ namespace SnakeWPF
         private SnakeElement GetSnakeHead() 
         {
             SnakeElement snakeHead = null;
-            foreach (var snakeElement in _snakeElements)
+            foreach (var snakeElement in snakeElements)
             {
                 if (snakeElement.IsHead)
                 {
@@ -250,10 +250,10 @@ namespace SnakeWPF
         private void CheckColisionWitchWorldBounds()
         {
             SnakeElement snakeHead = GetSnakeHead();
-            if (snakeHead.X > _gameWith - _elementSize ||
+            if (snakeHead.X > gameWith - elementSize ||
                 snakeHead.X < 0 ||
                 snakeHead.Y < 0 ||
-                snakeHead.Y > _gameHeight - _elementSize)
+                snakeHead.Y > gameHeight - elementSize)
             {
                 MessageBox.Show("Wąż uderzył głową w ścianę, koniec gry. Chcesz zagrać jeszcze raz?");
                 ResetGame();
@@ -263,9 +263,9 @@ namespace SnakeWPF
 
         private void MoveSnake()
         {
-            SnakeElement head = _snakeElements[0];
-            SnakeElement tail = _snakeElements[_snakeElements.Count - 1];
-            _tailBackup = new SnakeElement(_elementSize)
+            SnakeElement head = snakeElements[0];
+            SnakeElement tail = snakeElements[snakeElements.Count - 1];
+            tailBackup = new SnakeElement(elementSize)
             {
                 X = tail.X,
                 Y = tail.Y
@@ -275,26 +275,26 @@ namespace SnakeWPF
             tail.X = head.X;
             tail.Y = head.Y;
 
-            switch (_currentDirection)
+            switch (currentDirection)
             {
                 case Direction.Right:
-                    tail.X += _elementSize;
+                    tail.X += elementSize;
                     break;
                 case Direction.Left:
-                    tail.X -= _elementSize;
+                    tail.X -= elementSize;
                     break;
                 case Direction.Up:
-                    tail.Y -= _elementSize;
+                    tail.Y -= elementSize;
                     break;
                 case Direction.Down:
-                    tail.Y += _elementSize;
+                    tail.Y += elementSize;
                     break;
                 default:
                     break;
             }
 
-            _snakeElements.RemoveAt(_snakeElements.Count - 1);
-            _snakeElements.Insert(0, tail);
+            snakeElements.RemoveAt(snakeElements.Count - 1);
+            snakeElements.Insert(0, tail);
 
         
         }
@@ -303,20 +303,20 @@ namespace SnakeWPF
             switch (e.Key)
             {
                 case Key.W:
-                    if (_currentDirection != Direction.Down)
-                    _currentDirection = Direction.Up;
+                    if (currentDirection != Direction.Down)
+                    currentDirection = Direction.Up;
                     break;
                 case Key.A:
-                    if (_currentDirection != Direction.Right)
-                        _currentDirection = Direction.Left;
+                    if (currentDirection != Direction.Right)
+                        currentDirection = Direction.Left;
                     break;
                 case Key.S:
-                    if (_currentDirection != Direction.Up)
-                        _currentDirection = Direction.Down;
+                    if (currentDirection != Direction.Up)
+                        currentDirection = Direction.Down;
                     break;
                 case Key.D:
-                    if (_currentDirection != Direction.Left)
-                        _currentDirection = Direction.Right;
+                    if (currentDirection != Direction.Left)
+                        currentDirection = Direction.Right;
                     break;
 
             }
