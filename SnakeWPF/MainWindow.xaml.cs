@@ -159,11 +159,15 @@ namespace SnakeWPF
 
         private void  MainGameLoop(object sender, EventArgs e)
         {
-            MoveSnake();
-            CheckColision();
-            DrawSnake();
-            CreateApple();
-            DrawApples();
+            if (SnakePicture.Source==null)
+            {
+                MoveSnake();
+                CheckColision();
+                DrawSnake();
+                CreateApple();
+                DrawApples();
+            }
+           
             HideSnakePicture();
             
 
