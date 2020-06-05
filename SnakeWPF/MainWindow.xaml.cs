@@ -1,11 +1,15 @@
 ﻿using SnakeWPF.GameEntities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Net;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 namespace SnakeWPF
@@ -23,6 +27,8 @@ namespace SnakeWPF
         int points = 0;
         int pictureNumer = 0;
         int oldPictureNumer = 0;
+
+        int PictureTimer = 0;
 
         Apple apple;
         Random RandomNumber;
@@ -158,6 +164,20 @@ namespace SnakeWPF
             DrawSnake();
             CreateApple();
             DrawApples();
+            HideSnakePicture();
+            
+
+        }
+
+        private void HideSnakePicture()
+        {
+            if (SnakePicture.Source != null)
+                PictureTimer++;
+            if (PictureTimer > 3)
+            {
+                SnakePicture.Source = null;
+                PictureTimer = 0;
+            }
         }
 
         private void DrawApples()
@@ -207,13 +227,30 @@ namespace SnakeWPF
                 }
                 oldPictureNumer = pictureNumer;
                 Uri imageUrl = new Uri(listUrl[pictureNumer]);
-                wc.DownloadFileAsync(imageUrl, "Snake.png");
+                wc.DownloadFileAsync(imageUrl, "Snake.png");               
+                wc.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDownloadComplete);
                 GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
                 apple = null;
                 MakeGameFaster();
                 points++;
             }                  
+        }
+
+        private void FileDownloadComplete(object sender, AsyncCompletedEventArgs e)
+        {
+            //if (File.Exists(Environment.CurrentDirectory.ToString() + @"\..\.."))
+            //    File.Delete(Environment.CurrentDirectory.ToString() + @"\..\..");
+            //File.Move(Environment.CurrentDirectory.ToString() + @"\Snake.png", Environment.CurrentDirectory.ToString() + @"\..\..", true);
+            //File.Delete(Environment.CurrentDirectory.ToString() + @"\Snake.png");
+            BitmapImage src = new BitmapImage();
+            src.BeginInit();
+            //Environment.CurrentDirectory.ToString();
+            src.UriSource = new Uri(Environment.CurrentDirectory.ToString()  + @"\Snake.png", UriKind.Absolute);
+            //+ @"\..\.."
+            src.EndInit();
+            SnakePicture.Source = src;
+
         }
 
         private void GrowSnake()

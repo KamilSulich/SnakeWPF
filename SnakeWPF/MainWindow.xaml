@@ -6,5 +6,10 @@
         xmlns:local="clr-namespace:SnakeWPF"
         mc:Ignorable="d"
         Title="Snake" Height="500" Width="800" KeyUp="KeyWasRelased">
-    <Canvas x:Name="GameWorld"/>
+    <Grid>
+        <Canvas x:Name="GameWorld"/>
+        <Image x:Name="SnakePicture" Source="Snake.png"></Image>
+
+    </Grid>
+    
 </Window>
