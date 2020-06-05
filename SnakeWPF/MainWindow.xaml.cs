@@ -36,11 +36,9 @@ namespace SnakeWPF
         Direction currentDirection;
         DispatcherTimer gameLoopTimer;
         List<SnakeElement> snakeElements;
-        WebClient wc = new WebClient();
 
         List<string> listUrl;
 
-        bool firstSnake=true;
 
         public MainWindow()
         {
@@ -232,14 +230,13 @@ namespace SnakeWPF
                     pictureNumer = RandomNumber.Next(0, 4);
                 }
                 oldPictureNumer = pictureNumer;
-                Uri imageUrl = new Uri(listUrl[pictureNumer]);
-               // wc.CancelAsync();
-               if (firstSnake)
-                wc.DownloadFileAsync(imageUrl, "Snake1.png");
-               else
-                wc.DownloadFileAsync(imageUrl, "Snake2.png");
 
-                wc.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDownloadComplete);
+                BitmapImage src = new BitmapImage();
+                src.BeginInit();
+                src.UriSource = new Uri(listUrl[pictureNumer], UriKind.Absolute);
+                src.EndInit();
+                SnakePicture.Source = src;
+
                 GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
                 apple = null;
@@ -247,26 +244,7 @@ namespace SnakeWPF
                 points++;
             }                  
         }
-
-        private void FileDownloadComplete(object sender, AsyncCompletedEventArgs e)
-        {
-            //if (File.Exists(Environment.CurrentDirectory.ToString() + @"\..\.."))
-            //    File.Delete(Environment.CurrentDirectory.ToString() + @"\..\..");
-            //File.Move(Environment.CurrentDirectory.ToString() + @"\Snake.png", Environment.CurrentDirectory.ToString() + @"\..\..", true);
-            //File.Delete(Environment.CurrentDirectory.ToString() + @"\Snake.png");
-            BitmapImage src = new BitmapImage();
-            src.BeginInit();
-            //Environment.CurrentDirectory.ToString();
-            if (firstSnake)
-                src.UriSource = new Uri(Environment.CurrentDirectory.ToString()  + @"\Snake1.png", UriKind.Absolute);
-            else
-                src.UriSource = new Uri(Environment.CurrentDirectory.ToString() + @"\Snake2.png", UriKind.Absolute);          
-            firstSnake = !firstSnake;
-
-            //+ @"\..\.."
-            src.EndInit();
-            SnakePicture.Source = src;          
-        }
+     
 
         private void GrowSnake()
         {
