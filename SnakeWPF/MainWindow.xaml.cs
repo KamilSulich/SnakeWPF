@@ -36,8 +36,11 @@ namespace SnakeWPF
         Direction currentDirection;
         DispatcherTimer gameLoopTimer;
         List<SnakeElement> snakeElements;
+        WebClient wc = new WebClient();
 
         List<string> listUrl;
+
+        bool firstSnake=true;
 
         public MainWindow()
         {
@@ -223,7 +226,6 @@ namespace SnakeWPF
             
             if(head.X== apple.X && head.Y== apple.Y)
             {
-                WebClient wc = new WebClient();
                 pictureNumer = RandomNumber.Next(0, 4);
                 while (pictureNumer == oldPictureNumer)
                 {
@@ -231,7 +233,12 @@ namespace SnakeWPF
                 }
                 oldPictureNumer = pictureNumer;
                 Uri imageUrl = new Uri(listUrl[pictureNumer]);
-                wc.DownloadFileAsync(imageUrl, "Snake.png");               
+               // wc.CancelAsync();
+               if (firstSnake)
+                wc.DownloadFileAsync(imageUrl, "Snake1.png");
+               else
+                wc.DownloadFileAsync(imageUrl, "Snake2.png");
+
                 wc.DownloadFileCompleted += new AsyncCompletedEventHandler(FileDownloadComplete);
                 GameWorld.Children.Remove(apple.UIElement);
                 GrowSnake();
@@ -250,11 +257,15 @@ namespace SnakeWPF
             BitmapImage src = new BitmapImage();
             src.BeginInit();
             //Environment.CurrentDirectory.ToString();
-            src.UriSource = new Uri(Environment.CurrentDirectory.ToString()  + @"\Snake.png", UriKind.Absolute);
+            if (firstSnake)
+                src.UriSource = new Uri(Environment.CurrentDirectory.ToString()  + @"\Snake1.png", UriKind.Absolute);
+            else
+                src.UriSource = new Uri(Environment.CurrentDirectory.ToString() + @"\Snake2.png", UriKind.Absolute);          
+            firstSnake = !firstSnake;
+
             //+ @"\..\.."
             src.EndInit();
-            SnakePicture.Source = src;
-
+            SnakePicture.Source = src;          
         }
 
         private void GrowSnake()

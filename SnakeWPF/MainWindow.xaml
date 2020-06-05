@@ -8,7 +8,7 @@
         Title="Snake" Height="500" Width="800" KeyUp="KeyWasRelased">
     <Grid>
         <Canvas x:Name="GameWorld"/>
-        <Image x:Name="SnakePicture" Source="Snake.png"></Image>
+        <Image x:Name="SnakePicture" ></Image>
 
     </Grid>
     
